@@ -7,7 +7,7 @@ import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
 import StoryStats from './StoryStats';
 import { Button } from "@/components/ui/button";
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -90,8 +90,9 @@ const HackerNewsList = () => {
       </div>
 
       {isFetchingNextPage && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-          {Array(ITEMS_PER_PAGE).fill().map((_, index) => <StoryCardSkeleton key={index} />)}
+        <div className="flex justify-center items-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Loading more stories...</span>
         </div>
       )}
 
