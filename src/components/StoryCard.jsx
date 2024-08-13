@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare, Link as LinkIcon } from 'lucide-react';
+import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare, Link as LinkIcon, Bookmark } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -9,8 +9,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const StoryCard = ({ story }) => {
+  const [savedStories, setSavedStories] = useLocalStorage('savedStories', []);
+
+  const isSaved = savedStories.some(savedStory => savedStory.objectID === story.objectID);
+
+  const toggleSave = () => {
+    if (isSaved) {
+      setSavedStories(savedStories.filter(savedStory => savedStory.objectID !== story.objectID));
+    } else {
+      setSavedStories([...savedStories, story]);
+    }
+  };
   const formattedDate = new Date(story.created_at).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -96,10 +108,17 @@ const StoryCard = ({ story }) => {
         </Button>
         <Button
           variant="outline"
-          className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-secondary hover:text-white transition-colors duration-300"
+          className="flex-1 mx-2 dark:text-gray-300 dark:hover:text-white hover:bg-secondary hover:text-white transition-colors duration-300"
           onClick={() => window.open(`https://news.ycombinator.com/item?id=${story.objectID}`, '_blank')}
         >
           Comments <MessageSquare className="w-4 h-4 ml-2" />
+        </Button>
+        <Button
+          variant={isSaved ? "secondary" : "outline"}
+          className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-accent hover:text-white transition-colors duration-300"
+          onClick={toggleSave}
+        >
+          {isSaved ? 'Saved' : 'Save'} <Bookmark className="w-4 h-4 ml-2" />
         </Button>
       </CardFooter>
     </Card>
