@@ -12,6 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+
+const ITEMS_PER_PAGE = 12;
 
 const fetchTopStories = async () => {
   const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=100');
@@ -25,6 +36,7 @@ const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [sortOrder, setSortOrder] = React.useState('desc');
   const [sortBy, setSortBy] = React.useState('points');
+  const [currentPage, setCurrentPage] = React.useState(1);
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
@@ -46,6 +58,17 @@ const HackerNewsList = () => {
       return 0;
     });
   }, [data, searchTerm, sortOrder, sortBy]);
+
+  const totalPages = Math.ceil(filteredAndSortedStories.length / ITEMS_PER_PAGE);
+  const paginatedStories = filteredAndSortedStories.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
 
   if (error) {
     return (
@@ -93,13 +116,43 @@ const HackerNewsList = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          {filteredAndSortedStories.length > 0 ? (
-            filteredAndSortedStories.map(story => <StoryCard key={story.objectID} story={story} />)
-          ) : (
-            <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search.</p>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            {paginatedStories.length > 0 ? (
+              paginatedStories.map(story => <StoryCard key={story.objectID} story={story} />)
+            ) : (
+              <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search.</p>
+            )}
+          </div>
+          {totalPages > 1 && (
+            <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(index + 1)}
+                      isActive={currentPage === index + 1}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
-        </div>
+        </>
       )}
     </div>
   );
