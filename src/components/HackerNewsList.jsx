@@ -6,6 +6,8 @@ import SearchBar from './SearchBar';
 import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
 import StoryStats from './StoryStats';
+import { Button } from "@/components/ui/button";
+import { ArrowUp } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -18,6 +20,8 @@ const fetchStories = async ({ pageParam = 0, category }) => {
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const loadMoreRef = useRef(null);
   const loadMoreRef = useRef(null);
 
   const {
@@ -44,12 +48,24 @@ const HackerNewsList = () => {
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
     }
+
+    const handleScroll = () => {
+      setShowScrollTop(window.pageYOffset > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
     return () => {
       if (loadMoreRef.current) {
         observer.unobserve(loadMoreRef.current);
       }
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [handleObserver]);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const filteredStories = React.useMemo(() => {
     if (!data) return [];
@@ -81,6 +97,15 @@ const HackerNewsList = () => {
       )}
 
       <div ref={loadMoreRef} className="h-10" />
+      {showScrollTop && (
+        <Button
+          className="fixed bottom-4 right-4 rounded-full p-2"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 };
