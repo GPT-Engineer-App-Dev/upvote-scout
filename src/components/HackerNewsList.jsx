@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
@@ -18,6 +18,7 @@ const fetchStories = async ({ pageParam = 0, category }) => {
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const loadMoreRef = useRef(null);
 
   const {
     data,
@@ -31,15 +32,24 @@ const HackerNewsList = () => {
     getNextPageParam: (lastPage, pages) => lastPage.page + 1,
   });
 
-  const handleScroll = useCallback(() => {
-    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isFetchingNextPage) return;
-    if (hasNextPage) fetchNextPage();
-  }, [isFetchingNextPage, fetchNextPage, hasNextPage]);
+  const handleObserver = useCallback((entries) => {
+    const [target] = entries;
+    if (target.isIntersecting && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    const observer = new IntersectionObserver(handleObserver, { threshold: 1.0 });
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [handleObserver]);
 
   const filteredStories = React.useMemo(() => {
     if (!data) return [];
@@ -69,6 +79,8 @@ const HackerNewsList = () => {
           {Array(ITEMS_PER_PAGE).fill().map((_, index) => <StoryCardSkeleton key={index} />)}
         </div>
       )}
+
+      <div ref={loadMoreRef} className="h-10" />
     </div>
   );
 };
