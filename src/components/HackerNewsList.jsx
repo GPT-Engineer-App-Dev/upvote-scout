@@ -1,73 +1,66 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
-import { Button } from "@/components/ui/button";
+import TrendingTopics from './TrendingTopics';
+import { useInView } from 'react-intersection-observer';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 20;
 
-const fetchTopStories = async () => {
-  const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page');
+const fetchStories = async ({ pageParam = 0 }) => {
+  const response = await fetch(`https://hn.algolia.com/api/v1/search?tags=front_page&page=${pageParam}`);
   if (!response.ok) throw new Error('Failed to fetch stories');
   return response.json();
 };
 
 const HackerNewsList = () => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['topStories'],
-    queryFn: fetchTopStories,
-    staleTime: 5 * 60 * 1000,
+  const [searchTerm, setSearchTerm] = useState('');
+  const { ref, inView } = useInView();
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['stories'],
+    queryFn: fetchStories,
+    getNextPageParam: (lastPage, pages) => lastPage.page + 1,
   });
 
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, fetchNextPage, hasNextPage]);
+
   const filteredStories = React.useMemo(() => {
-    if (!data?.hits) return [];
-    return data.hits.filter(story => 
+    if (!data) return [];
+    return data.pages.flatMap(page => page.hits).filter(story => 
       story.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [data, searchTerm]);
 
-  const paginatedStories = React.useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredStories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredStories, currentPage]);
-
-  const totalPages = Math.ceil(filteredStories.length / ITEMS_PER_PAGE);
-
-  if (error) return <div className="text-red-500 p-4">An error occurred: {error.message}</div>;
+  if (status === 'error') return <div className="text-red-500 p-4">An error occurred while fetching stories.</div>;
 
   return (
     <div className="space-y-6">
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <TrendingTopics />
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {isLoading
-          ? Array(ITEMS_PER_PAGE).fill().map((_, index) => <StoryCardSkeleton key={index} />)
-          : paginatedStories.map(story => <StoryCard key={story.objectID} story={story} />)
-        }
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredStories.map(story => <StoryCard key={story.objectID} story={story} />)}
       </div>
 
-      {!isLoading && (
-        <div className="flex justify-center space-x-2 mt-4">
-          <Button 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="mx-2 self-center">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+      {isFetchingNextPage && (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
+          {Array(ITEMS_PER_PAGE).fill().map((_, index) => <StoryCardSkeleton key={index} />)}
         </div>
       )}
+
+      <div ref={ref} className="h-10" />
     </div>
   );
 };

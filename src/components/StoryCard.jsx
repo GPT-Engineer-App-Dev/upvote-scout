@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, MessageSquare, ThumbsUp } from 'lucide-react';
+import { ExternalLink, MessageSquare, ThumbsUp, Clock } from 'lucide-react';
 
 const StoryCard = ({ story }) => {
   return (
@@ -11,11 +11,19 @@ const StoryCard = ({ story }) => {
           <a href={story.url} target="_blank" rel="noopener noreferrer">{story.title}</a>
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">By {story.author}</p>
-        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-          <ThumbsUp className="w-4 h-4 mr-1" />
-          <span className="mr-4">{story.points}</span>
-          <MessageSquare className="w-4 h-4 mr-1" />
-          <span>{story.num_comments}</span>
+        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
+          <span className="flex items-center">
+            <ThumbsUp className="w-4 h-4 mr-1" />
+            {story.points}
+          </span>
+          <span className="flex items-center">
+            <MessageSquare className="w-4 h-4 mr-1" />
+            {story.num_comments}
+          </span>
+          <span className="flex items-center">
+            <Clock className="w-4 h-4 mr-1" />
+            {new Date(story.created_at).toLocaleDateString()}
+          </span>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
