@@ -46,7 +46,36 @@ const HackerNewsList = () => {
     refetchInterval: 5 * 60 * 1000,
   });
 
-  // ... (rest of the component logic remains the same)
+  const filteredStories = React.useMemo(() => {
+    if (!data || !data.hits) return [];
+    return data.hits.filter(story => {
+      const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || story._tags.includes(selectedCategory);
+      return matchesSearch && matchesCategory;
+    });
+  }, [data, searchTerm, selectedCategory]);
+
+  const sortedStories = React.useMemo(() => {
+    return [...filteredStories].sort((a, b) => {
+      const aValue = sortBy === 'date' ? new Date(a.created_at).getTime() : a.points;
+      const bValue = sortBy === 'date' ? new Date(b.created_at).getTime() : b.points;
+      return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+    });
+  }, [filteredStories, sortBy, sortOrder]);
+
+  const totalPages = Math.ceil(sortedStories.length / ITEMS_PER_PAGE);
+
+  const paginatedStories = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedStories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [sortedStories, currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
+
+  if (error) return <div>An error occurred: {error.message}</div>;
 
   return (
     <div className="space-y-6">
