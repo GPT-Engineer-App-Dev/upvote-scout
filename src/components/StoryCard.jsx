@@ -1,17 +1,22 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, MessageSquare } from 'lucide-react';
+import { ExternalLink, MessageSquare, ThumbsUp } from 'lucide-react';
 
 const StoryCard = ({ story }) => {
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200">
       <CardContent className="flex-grow pt-6">
-        <h2 className="text-lg font-semibold mb-2 line-clamp-2">{story.title}</h2>
-        <p className="text-sm text-gray-500 mb-2">By {story.author}</p>
-        <p className="text-sm text-gray-500">
-          {story.points} points | {story.num_comments} comments
-        </p>
+        <h2 className="text-lg font-semibold mb-2 line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400">
+          <a href={story.url} target="_blank" rel="noopener noreferrer">{story.title}</a>
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">By {story.author}</p>
+        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+          <ThumbsUp className="w-4 h-4 mr-1" />
+          <span className="mr-4">{story.points}</span>
+          <MessageSquare className="w-4 h-4 mr-1" />
+          <span>{story.num_comments}</span>
+        </div>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button
