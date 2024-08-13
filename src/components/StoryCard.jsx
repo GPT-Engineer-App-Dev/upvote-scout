@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare, Link as LinkIcon, Bookmark } from 'lucide-react';
+import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare, Link as LinkIcon, Bookmark, Share2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const StoryCard = ({ story }) => {
   const [savedStories, setSavedStories] = useLocalStorage('savedStories', []);
@@ -115,11 +121,29 @@ const StoryCard = ({ story }) => {
         </Button>
         <Button
           variant={isSaved ? "secondary" : "outline"}
-          className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-accent hover:text-white transition-colors duration-300"
+          className="flex-1 mx-2 dark:text-gray-300 dark:hover:text-white hover:bg-accent hover:text-white transition-colors duration-300"
           onClick={toggleSave}
         >
           {isSaved ? 'Saved' : 'Save'} <Bookmark className="w-4 h-4 ml-2" />
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300">
+              Share <Share2 className="w-4 h-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(story.title)}&url=${encodeURIComponent(story.url)}`, '_blank')}>
+              Share on Twitter
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(story.url)}`, '_blank')}>
+              Share on Facebook
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(story.url)}&title=${encodeURIComponent(story.title)}`, '_blank')}>
+              Share on LinkedIn
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );
