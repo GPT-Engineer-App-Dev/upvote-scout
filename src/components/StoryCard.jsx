@@ -1,10 +1,23 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, MessageSquare, ThumbsUp, Clock, User } from 'lucide-react';
+import { ExternalLink, MessageSquare, ThumbsUp, Clock, User, Bookmark } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const StoryCard = ({ story }) => {
+  const [savedStories, setSavedStories] = useLocalStorage('savedStories', []);
+
+  const isSaved = savedStories.some(savedStory => savedStory.objectID === story.objectID);
+
+  const toggleSave = () => {
+    if (isSaved) {
+      setSavedStories(savedStories.filter(savedStory => savedStory.objectID !== story.objectID));
+    } else {
+      setSavedStories([...savedStories, story]);
+    }
+  };
+
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200">
       <CardContent className="flex-grow pt-6">
@@ -48,6 +61,13 @@ const StoryCard = ({ story }) => {
           onClick={() => window.open(`https://news.ycombinator.com/item?id=${story.objectID}`, '_blank')}
         >
           Comments <MessageSquare className="w-4 h-4 ml-2" />
+        </Button>
+        <Button
+          variant={isSaved ? "secondary" : "outline"}
+          size="sm"
+          onClick={toggleSave}
+        >
+          <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
         </Button>
       </CardFooter>
     </Card>
