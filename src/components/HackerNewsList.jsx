@@ -3,160 +3,74 @@ import { useQuery } from '@tanstack/react-query';
 import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
-import CategoryFilter from './CategoryFilter';
-import StoryStats from './StoryStats';
 import { Button } from "@/components/ui/button";
-import { RefreshCw, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 10;
 
 const fetchTopStories = async () => {
-  const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=100');
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
+  const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page');
+  if (!response.ok) throw new Error('Failed to fetch stories');
   return response.json();
 };
 
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [sortOrder, setSortOrder] = React.useState('desc');
-  const [sortBy, setSortBy] = React.useState('points');
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [selectedCategory, setSelectedCategory] = React.useState('all');
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
     staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
   });
 
   const filteredStories = React.useMemo(() => {
-    if (!data || !data.hits) return [];
-    return data.hits.filter(story => {
-      const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || story._tags.includes(selectedCategory);
-      return matchesSearch && matchesCategory;
-    });
-  }, [data, searchTerm, selectedCategory]);
-
-  const sortedStories = React.useMemo(() => {
-    return [...filteredStories].sort((a, b) => {
-      const aValue = sortBy === 'date' ? new Date(a.created_at).getTime() : a.points;
-      const bValue = sortBy === 'date' ? new Date(b.created_at).getTime() : b.points;
-      return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
-    });
-  }, [filteredStories, sortBy, sortOrder]);
-
-  const totalPages = Math.ceil(sortedStories.length / ITEMS_PER_PAGE);
+    if (!data?.hits) return [];
+    return data.hits.filter(story => 
+      story.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [data, searchTerm]);
 
   const paginatedStories = React.useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return sortedStories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [sortedStories, currentPage]);
+    return filteredStories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredStories, currentPage]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo(0, 0);
-  };
+  const totalPages = Math.ceil(filteredStories.length / ITEMS_PER_PAGE);
 
-  if (error) return <div>An error occurred: {error.message}</div>;
+  if (error) return <div className="text-red-500">An error occurred: {error.message}</div>;
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 space-y-4">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <div className="flex flex-wrap gap-4">
-          <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="points">Points</SelectItem>
-              <SelectItem value="date">Date</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline"
-            onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-            className="w-[140px]"
-          >
-            {sortOrder === 'desc' ? (
-              <ArrowDownCircle className="w-4 h-4 mr-2" />
-            ) : (
-              <ArrowUpCircle className="w-4 h-4 mr-2" />
-            )}
-            {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
-          </Button>
-          <Button onClick={() => refetch()} disabled={isFetching} className="w-[140px]">
-            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
-      </div>
-
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(9)].map((_, index) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(ITEMS_PER_PAGE)].map((_, index) => (
             <StoryCardSkeleton key={index} />
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedStories.length > 0 ? (
-              paginatedStories.map(story => <StoryCard key={story.objectID} story={story} />)
-            ) : (
-              <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search and category.</p>
-            )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedStories.map(story => (
+              <StoryCard key={story.objectID} story={story} />
+            ))}
           </div>
-          {totalPages > 1 && (
-            <Pagination className="mt-8">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                {[...Array(totalPages)].map((_, index) => (
-                  <PaginationItem key={index}>
-                    <PaginationLink
-                      onClick={() => handlePageChange(index + 1)}
-                      isActive={currentPage === index + 1}
-                    >
-                      {index + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <div className="flex justify-center space-x-2 mt-4">
+            <Button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </>
       )}
-      {!isLoading && <StoryStats stories={data?.hits || []} />}
     </div>
   );
 };
