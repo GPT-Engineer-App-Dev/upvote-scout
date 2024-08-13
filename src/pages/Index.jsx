@@ -9,15 +9,15 @@ const Index = () => {
   const [showSaved, setShowSaved] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-orange-500 dark:text-orange-400">HN Reader</h1>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+      <header className="bg-white dark:bg-gray-800 shadow-md">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-orange-500 dark:text-orange-400">HN Reader</h1>
           <div className="flex items-center space-x-4">
             <Button 
               variant="ghost"
               onClick={() => setShowSaved(!showSaved)}
-              className="text-sm flex items-center"
+              className="text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               {showSaved ? (
                 <>
