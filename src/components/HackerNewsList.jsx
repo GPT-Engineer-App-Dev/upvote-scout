@@ -40,6 +40,8 @@ const HackerNewsList = () => {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
   });
 
   const filteredAndSortedStories = React.useMemo(() => {
@@ -69,6 +71,10 @@ const HackerNewsList = () => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortOrder, sortBy]);
 
   if (error) {
     return (
