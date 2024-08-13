@@ -4,6 +4,7 @@ import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import CategoryFilter from './CategoryFilter';
+import StoryStats from './StoryStats';
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
 import {
@@ -170,6 +171,7 @@ const HackerNewsList = () => {
           )}
         </>
       )}
+      {!isLoading && <StoryStats stories={data?.hits || []} />}
     </div>
   );
 };
