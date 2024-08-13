@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare } from 'lucide-react';
+import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare, Link as LinkIcon } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Badge } from "@/components/ui/badge"
 
 const StoryCard = ({ story }) => {
   const formattedDate = new Date(story.created_at).toLocaleString('en-US', {
@@ -18,10 +19,18 @@ const StoryCard = ({ story }) => {
     minute: '2-digit'
   });
 
+  const domain = story.url ? new URL(story.url).hostname : '';
+
   return (
     <Card className="h-full flex flex-col dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
       <CardContent className="flex-grow pt-6">
         <h2 className="text-xl font-semibold mb-3 dark:text-white line-clamp-2">{story.title}</h2>
+        {domain && (
+          <Badge variant="secondary" className="mb-3">
+            <LinkIcon className="w-3 h-3 mr-1" />
+            {domain}
+          </Badge>
+        )}
         <div className="flex flex-wrap items-center text-sm text-gray-500 dark:text-gray-400 mb-4 gap-4">
           <TooltipProvider>
             <Tooltip>
