@@ -5,6 +5,7 @@ import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import TrendingTopics from './TrendingTopics';
 import CategoryFilter from './CategoryFilter';
+import StoryStats from './StoryStats';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -57,6 +58,8 @@ const HackerNewsList = () => {
       </div>
       <TrendingTopics />
       
+      <StoryStats stories={filteredStories} />
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredStories.map(story => <StoryCard key={story.objectID} story={story} />)}
       </div>
