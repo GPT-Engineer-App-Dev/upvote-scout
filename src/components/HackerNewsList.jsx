@@ -22,7 +22,6 @@ const HackerNewsList = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const loadMoreRef = useRef(null);
-  const loadMoreRef = useRef(null);
 
   const {
     data,
