@@ -17,10 +17,10 @@ import {
 
 const categories = [
   { value: "all", label: "All Categories" },
-  { value: "technology", label: "Technology" },
-  { value: "business", label: "Business" },
-  { value: "science", label: "Science" },
-  { value: "programming", label: "Programming" },
+  { value: "story", label: "Stories" },
+  { value: "comment", label: "Comments" },
+  { value: "poll", label: "Polls" },
+  { value: "job", label: "Jobs" },
 ]
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {

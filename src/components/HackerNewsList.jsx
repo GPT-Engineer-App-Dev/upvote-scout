@@ -4,17 +4,19 @@ import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import TrendingTopics from './TrendingTopics';
+import CategoryFilter from './CategoryFilter';
 
 const ITEMS_PER_PAGE = 20;
 
-const fetchStories = async ({ pageParam = 0 }) => {
-  const response = await fetch(`https://hn.algolia.com/api/v1/search?tags=front_page&page=${pageParam}`);
+const fetchStories = async ({ pageParam = 0, category }) => {
+  const response = await fetch(`https://hn.algolia.com/api/v1/search?tags=front_page${category !== 'all' ? `,${category}` : ''}&page=${pageParam}`);
   if (!response.ok) throw new Error('Failed to fetch stories');
   return response.json();
 };
 
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const {
     data,
@@ -23,8 +25,8 @@ const HackerNewsList = () => {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ['stories'],
-    queryFn: fetchStories,
+    queryKey: ['stories', selectedCategory],
+    queryFn: ({ pageParam }) => fetchStories({ pageParam, category: selectedCategory }),
     getNextPageParam: (lastPage, pages) => lastPage.page + 1,
   });
 
@@ -49,7 +51,10 @@ const HackerNewsList = () => {
 
   return (
     <div className="space-y-6">
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+      </div>
       <TrendingTopics />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
