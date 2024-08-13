@@ -4,7 +4,7 @@ import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 
 const fetchTopStories = async () => {
   const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=100');
@@ -16,7 +16,7 @@ const fetchTopStories = async () => {
 
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
   });
@@ -37,11 +37,19 @@ const HackerNewsList = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center dark:text-white">Hacker News Top Stories</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold dark:text-white">Hacker News Top Stories</h1>
+        <Button onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       {isLoading ? (
-        <div className="flex justify-center items-center mt-8">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {[...Array(9)].map((_, index) => (
+            <StoryCardSkeleton key={index} />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">

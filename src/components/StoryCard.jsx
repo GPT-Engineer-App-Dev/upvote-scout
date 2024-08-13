@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpCircle, ExternalLink, User, Clock } from 'lucide-react';
+import { ArrowUpCircle, ExternalLink, User, Clock, MessageSquare } from 'lucide-react';
 
 const StoryCard = ({ story }) => {
   return (
@@ -21,15 +21,26 @@ const StoryCard = ({ story }) => {
             <Clock className="w-4 h-4 mr-1 text-green-500" />
             <span>{new Date(story.created_at).toLocaleDateString()}</span>
           </div>
+          <div className="flex items-center">
+            <MessageSquare className="w-4 h-4 mr-1 text-purple-500" />
+            <span>{story.num_comments} comments</span>
+          </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex justify-between">
         <Button
           variant="outline"
-          className="w-full dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300"
+          className="flex-1 mr-2 dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300"
           onClick={() => window.open(story.url, '_blank')}
         >
           Read More <ExternalLink className="w-4 h-4 ml-2" />
+        </Button>
+        <Button
+          variant="outline"
+          className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-secondary hover:text-white transition-colors duration-300"
+          onClick={() => window.open(`https://news.ycombinator.com/item?id=${story.objectID}`, '_blank')}
+        >
+          Comments <MessageSquare className="w-4 h-4 ml-2" />
         </Button>
       </CardFooter>
     </Card>
