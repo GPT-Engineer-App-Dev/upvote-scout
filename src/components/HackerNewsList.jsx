@@ -4,7 +4,14 @@ import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, RefreshCw, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const fetchTopStories = async () => {
   const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=100');
@@ -17,6 +24,7 @@ const fetchTopStories = async () => {
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [sortOrder, setSortOrder] = React.useState('desc');
+  const [sortBy, setSortBy] = React.useState('points');
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
@@ -28,13 +36,16 @@ const HackerNewsList = () => {
     ) || [];
     
     return stories.sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a.points - b.points;
-      } else {
-        return b.points - a.points;
+      if (sortBy === 'points') {
+        return sortOrder === 'asc' ? a.points - b.points : b.points - a.points;
+      } else if (sortBy === 'date') {
+        return sortOrder === 'asc' 
+          ? new Date(a.created_at) - new Date(b.created_at)
+          : new Date(b.created_at) - new Date(a.created_at);
       }
+      return 0;
     });
-  }, [data, searchTerm, sortOrder]);
+  }, [data, searchTerm, sortOrder, sortBy]);
 
   if (error) {
     return (
@@ -48,16 +59,25 @@ const HackerNewsList = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold dark:text-white">Hacker News Top Stories</h1>
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold dark:text-white mb-4 md:mb-0">Hacker News Top Stories</h1>
+        <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="points">Points</SelectItem>
+              <SelectItem value="date">Date</SelectItem>
+            </SelectContent>
+          </Select>
           <Button onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}>
             {sortOrder === 'desc' ? (
               <ArrowDownCircle className="w-4 h-4 mr-2" />
             ) : (
               <ArrowUpCircle className="w-4 h-4 mr-2" />
             )}
-            Sort by Points
+            {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
           </Button>
           <Button onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
