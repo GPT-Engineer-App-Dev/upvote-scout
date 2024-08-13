@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import TrendingTopics from './TrendingTopics';
-import { useInView } from 'react-intersection-observer';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -16,7 +15,6 @@ const fetchStories = async ({ pageParam = 0 }) => {
 
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { ref, inView } = useInView();
 
   const {
     data,
@@ -30,11 +28,15 @@ const HackerNewsList = () => {
     getNextPageParam: (lastPage, pages) => lastPage.page + 1,
   });
 
+  const handleScroll = useCallback(() => {
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || isFetchingNextPage) return;
+    if (hasNextPage) fetchNextPage();
+  }, [isFetchingNextPage, fetchNextPage, hasNextPage]);
+
   useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, fetchNextPage, hasNextPage]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   const filteredStories = React.useMemo(() => {
     if (!data) return [];
@@ -59,8 +61,6 @@ const HackerNewsList = () => {
           {Array(ITEMS_PER_PAGE).fill().map((_, index) => <StoryCardSkeleton key={index} />)}
         </div>
       )}
-
-      <div ref={ref} className="h-10" />
     </div>
   );
 };
