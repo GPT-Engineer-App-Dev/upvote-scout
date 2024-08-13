@@ -36,7 +36,7 @@ const HackerNewsList = () => {
 
   const totalPages = Math.ceil(filteredStories.length / ITEMS_PER_PAGE);
 
-  if (error) return <div className="text-red-500">An error occurred: {error.message}</div>;
+  if (error) return <div className="text-red-500 p-4">An error occurred: {error.message}</div>;
 
   return (
     <div className="space-y-6">
@@ -62,6 +62,9 @@ const HackerNewsList = () => {
             >
               Previous
             </Button>
+            <span className="mx-2 self-center">
+              Page {currentPage} of {totalPages}
+            </span>
             <Button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
