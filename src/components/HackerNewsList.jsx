@@ -6,7 +6,7 @@ import SearchBar from './SearchBar';
 import CategoryFilter from './CategoryFilter';
 import StoryStats from './StoryStats';
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
+import { RefreshCw, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -17,7 +17,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -89,7 +88,6 @@ const HackerNewsList = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
         <h2 className="text-2xl font-bold mb-4">Error: {error.message}</h2>
         <Button onClick={() => refetch()}>Retry</Button>
       </div>
@@ -98,9 +96,10 @@ const HackerNewsList = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold dark:text-white mb-4 md:mb-0">Hacker News Top Stories</h1>
-        <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold dark:text-white mb-4">Hacker News Top Stories</h1>
+        <div className="flex flex-col md:flex-row gap-4 items-center mb-4">
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px]">
@@ -125,7 +124,6 @@ const HackerNewsList = () => {
           </Button>
         </div>
       </div>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           {[...Array(9)].map((_, index) => (
