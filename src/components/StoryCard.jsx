@@ -104,31 +104,31 @@ const StoryCard = ({ story }) => {
           </TooltipProvider>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="grid grid-cols-2 gap-2">
         <Button
           variant="outline"
-          className="flex-1 mr-2 dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300"
+          className="w-full dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300"
           onClick={() => window.open(story.url, '_blank')}
         >
           Read More <ExternalLink className="w-4 h-4 ml-2" />
         </Button>
         <Button
           variant="outline"
-          className="flex-1 mx-2 dark:text-gray-300 dark:hover:text-white hover:bg-secondary hover:text-white transition-colors duration-300"
+          className="w-full dark:text-gray-300 dark:hover:text-white hover:bg-secondary hover:text-white transition-colors duration-300"
           onClick={() => window.open(`https://news.ycombinator.com/item?id=${story.objectID}`, '_blank')}
         >
           Comments <MessageSquare className="w-4 h-4 ml-2" />
         </Button>
         <Button
           variant={isSaved ? "secondary" : "outline"}
-          className="flex-1 mx-2 dark:text-gray-300 dark:hover:text-white hover:bg-accent hover:text-white transition-colors duration-300"
+          className="w-full dark:text-gray-300 dark:hover:text-white hover:bg-accent hover:text-white transition-colors duration-300"
           onClick={toggleSave}
         >
           {isSaved ? 'Saved' : 'Save'} <Bookmark className="w-4 h-4 ml-2" />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex-1 ml-2 dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300">
+            <Button variant="outline" className="w-full dark:text-gray-300 dark:hover:text-white hover:bg-primary hover:text-white transition-colors duration-300">
               Share <Share2 className="w-4 h-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>

@@ -8,17 +8,25 @@ const Index = () => {
   const [showSaved, setShowSaved] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-      <ThemeToggle />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold dark:text-white">Hacker News</h1>
-          <Button onClick={() => setShowSaved(!showSaved)}>
-            {showSaved ? 'Show Top Stories' : 'Show Saved Stories'}
-          </Button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Hacker News</h1>
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="outline"
+              onClick={() => setShowSaved(!showSaved)}
+              className="text-sm"
+            >
+              {showSaved ? 'Show Top Stories' : 'Show Saved Stories'}
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
+      </header>
+      <main className="container mx-auto px-4 py-8">
         {showSaved ? <SavedStoriesList /> : <HackerNewsList />}
-      </div>
+      </main>
     </div>
   );
 };

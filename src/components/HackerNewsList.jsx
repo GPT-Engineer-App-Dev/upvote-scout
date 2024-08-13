@@ -95,14 +95,14 @@ const HackerNewsList = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold dark:text-white mb-4">Hacker News Top Stories</h1>
-        <div className="flex flex-col md:flex-row gap-4 items-center mb-4">
+    <div>
+      <div className="mb-8 space-y-4">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">Top Stories</h2>
+        <div className="flex flex-col md:flex-row gap-4">
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -110,7 +110,11 @@ const HackerNewsList = () => {
               <SelectItem value="date">Date</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}>
+          <Button 
+            variant="outline"
+            onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+            className="w-[140px]"
+          >
             {sortOrder === 'desc' ? (
               <ArrowDownCircle className="w-4 h-4 mr-2" />
             ) : (
@@ -118,21 +122,21 @@ const HackerNewsList = () => {
             )}
             {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
           </Button>
-          <Button onClick={() => refetch()} disabled={isFetching}>
+          <Button onClick={() => refetch()} disabled={isFetching} className="w-[140px]">
             <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
       </div>
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(9)].map((_, index) => (
             <StoryCardSkeleton key={index} />
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedStories.length > 0 ? (
               paginatedStories.map(story => <StoryCard key={story.objectID} story={story} />)
             ) : (
