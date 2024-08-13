@@ -4,7 +4,7 @@ import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 const fetchTopStories = async () => {
   const response = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=100');
@@ -16,14 +16,25 @@ const fetchTopStories = async () => {
 
 const HackerNewsList = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [sortOrder, setSortOrder] = React.useState('desc');
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
   });
 
-  const filteredStories = data?.hits.filter(story =>
-    story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredAndSortedStories = React.useMemo(() => {
+    let stories = data?.hits.filter(story =>
+      story.title.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+    
+    return stories.sort((a, b) => {
+      if (sortOrder === 'asc') {
+        return a.points - b.points;
+      } else {
+        return b.points - a.points;
+      }
+    });
+  }, [data, searchTerm, sortOrder]);
 
   if (error) {
     return (
@@ -39,10 +50,20 @@ const HackerNewsList = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold dark:text-white">Hacker News Top Stories</h1>
-        <Button onClick={() => refetch()} disabled={isFetching}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center space-x-4">
+          <Button onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}>
+            {sortOrder === 'desc' ? (
+              <ArrowDownCircle className="w-4 h-4 mr-2" />
+            ) : (
+              <ArrowUpCircle className="w-4 h-4 mr-2" />
+            )}
+            Sort by Points
+          </Button>
+          <Button onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       {isLoading ? (
@@ -53,8 +74,8 @@ const HackerNewsList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          {filteredStories.length > 0 ? (
-            filteredStories.map(story => <StoryCard key={story.objectID} story={story} />)
+          {filteredAndSortedStories.length > 0 ? (
+            filteredAndSortedStories.map(story => <StoryCard key={story.objectID} story={story} />)
           ) : (
             <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search.</p>
           )}
