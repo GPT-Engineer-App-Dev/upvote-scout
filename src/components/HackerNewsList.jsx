@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import StoryCard from './StoryCard';
 import StoryCardSkeleton from './StoryCardSkeleton';
 import SearchBar from './SearchBar';
+import CategoryFilter from './CategoryFilter';
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw, ArrowUpCircle, ArrowDownCircle, Filter } from 'lucide-react';
 import {
@@ -37,6 +38,7 @@ const HackerNewsList = () => {
   const [sortOrder, setSortOrder] = React.useState('desc');
   const [sortBy, setSortBy] = React.useState('points');
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [selectedCategory, setSelectedCategory] = React.useState('all');
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['topStories'],
     queryFn: fetchTopStories,
@@ -49,6 +51,13 @@ const HackerNewsList = () => {
       story.title.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
     
+    if (selectedCategory !== 'all') {
+      stories = stories.filter(story => 
+        story.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+        (story._tags && story._tags.includes(selectedCategory.toLowerCase()))
+      );
+    }
+    
     return stories.sort((a, b) => {
       if (sortBy === 'points') {
         return sortOrder === 'asc' ? a.points - b.points : b.points - a.points;
@@ -59,7 +68,7 @@ const HackerNewsList = () => {
       }
       return 0;
     });
-  }, [data, searchTerm, sortOrder, sortBy]);
+  }, [data, searchTerm, sortOrder, sortBy, selectedCategory]);
 
   const totalPages = Math.ceil(filteredAndSortedStories.length / ITEMS_PER_PAGE);
   const paginatedStories = filteredAndSortedStories.slice(
@@ -74,7 +83,7 @@ const HackerNewsList = () => {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, sortOrder, sortBy]);
+  }, [searchTerm, sortOrder, sortBy, selectedCategory]);
 
   if (error) {
     return (
@@ -91,6 +100,7 @@ const HackerNewsList = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
         <h1 className="text-3xl font-bold dark:text-white mb-4 md:mb-0">Hacker News Top Stories</h1>
         <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0">
+          <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
@@ -127,7 +137,7 @@ const HackerNewsList = () => {
             {paginatedStories.length > 0 ? (
               paginatedStories.map(story => <StoryCard key={story.objectID} story={story} />)
             ) : (
-              <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search.</p>
+              <p className="col-span-full text-center text-lg text-gray-500 dark:text-gray-400">No stories found matching your search and category.</p>
             )}
           </div>
           {totalPages > 1 && (
